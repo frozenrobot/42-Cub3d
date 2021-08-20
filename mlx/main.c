@@ -31,6 +31,11 @@ int max(int a, int b)
 	return (a > b ? a : b);
 }
 
+int min(int a, int b)
+{
+	return (a > b ? b : a);
+}
+
 void mlx_erase(void)
 {
 	int i;
@@ -53,168 +58,179 @@ void	cast_rays(int **grid, t_player *p, int grid_w, int grid_h)
 {
 	int x_dist;
 	int y_dist;
+	int mindist;
 	int x;
 	int y;
 	int dx;
 	int dy;
-	int dists_fov[60];
+	int wall; //W=1, N=2, E=3, S=4;
+	int dists_fov[60][2];
+	int i;
+	float O;
 
-	//this part sets the values for x_dist and y_dist (then, whichever is smaller is taken as ray dist; direction facing is set accordingly; then wall length is calculated)
-	x_dist = 2 * max(grid_w, grid_h);
-	y_dist = 2 * max(grid_w, grid_h);
-	if (p->O >= 0 && p->O < M_PI / 2)
+	i = 0;
+	O = p->O - 0.6;
+	while (i++ < 60)
 	{
-		//finding x_dist
-		dx = (p->posx % 100); //x goes to nearest line on left
-		dy = dx * tan(p->O); //diff in y depends on angle
-		x = p->posx - dx; //x and y are the positions of the ray when intersecting a vertical line
-		y = p->posy - dy;
-		while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
+		//this part sets the values for x_dist and y_dist (then, whichever is smaller is taken as ray dist; direction facing is set accordingly; then wall length is calculated)
+		x_dist = 2 * max(grid_w, grid_h);
+		y_dist = 2 * max(grid_w, grid_h);
+		if (O >= 0 && O < M_PI / 2)
 		{
-			if (grid[((y - 1) / 100)][(x - 1) / 100] == 1) //i-j coordinates of the block that the ray is intersecting (on the grid) : \ 
-			{
-				x_dist = dy / sin(p->O); //length of the ray
-				break ;
-			}
-			dx += 100; //if grid value of block is 0 (empty space), keep going to the next vertical line until intersection with grid value 1 found
-			dy += 100 * tan(p->O);
-			x = p->posx - dx;
+			//finding x_dist
+			dx = (p->posx % 100); //x goes to nearest line on left
+			dy = dx * tan(O); //diff in y depends on angle
+			x = p->posx - dx; //x and y are the positions of the ray when intersecting a vertical line
 			y = p->posy - dy;
-		}
-		//finding y_dist
-		dy = p->posy % 100;
-		dx = dy / tan(p->O);
-		while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
-		{
-			x = p->posx - dx;
-			y = p->posy - dy;
-			if (grid[(y - 1) / 100][((x - 1) / 100)] == 1)
+			while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
 			{
-				y_dist = dy / sin(p->O);
-				break ;
+				if (grid[((y - 1) / 100)][(x - 1) / 100] == 1) //i-j coordinates of the block that the ray is intersecting (on the grid) : \ 
+				{
+					x_dist = dx / cos(O); //length of the ray
+					break ;
+				}
+				dx += 100; //if grid value of block is 0 (empty space), keep going to the next vertical line until intersection with grid value 1 found
+				dy += 100 * tan(O);
+				x = p->posx - dx;
+				y = p->posy - dy;
 			}
-			dy += 100;
-			dx = dy / tan(p->O);
-		}
-	}
-	else if (p->O >= M_PI / 2 && p->O < M_PI)
-	{
-		dx = 100 - (posx % 100);
-		dy = dx * tan(M_PI - O);
-		x = posx + dx;
-		y = posy - dy;
-		while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
-		{
-            printf("x = %i, y = %i\n", x, y);
-            printf("dx = %i, dy = %i\n", dx, dy);
-            printf("checking coordinates: %i, %i\n", ((y-1)/ 100), (x+1) / 100);
-			if (grid[((y-1) / 100)][(x + 1) / 100] == 1)
+			//finding y_dist
+			dy = p->posy % 100;
+			dx = dy / tan(O);
+			while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
 			{
-				x_dist = dy / sin(M_PI - O);
-				break ;
+				x = p->posx - dx;
+				y = p->posy - dy;
+				if (grid[(y - 1) / 100][((x - 1) / 100)] == 1)
+				{
+					y_dist = dy / sin(O);
+					break ;
+				}
+				dy += 100;
+				dx = dy / tan(O);
 			}
-			dx += 100;
+			mindist = min(x_dist, y_dist);
+			wall = (x_dist > y_dist ? 4 : 3);
+		}
+		else if (O >= M_PI / 2 && O < M_PI)
+		{
+			dx = 100 - (p->posx % 100);
 			dy = dx * tan(M_PI - O);
-			x = posx + dx;
-			y = posy - dy;
-		}
-		dy = posy % 100;
-		dx = dy / tan(M_PI - O);
-		x = posx + dx;
-		y = posy - dy;
-		while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
-		{
-            printf("checking coordinates: %i, %i\n", ((y-1)/ 100), x/ 100 );
-			if (grid[(y - 1) / 100][x / 100] == 1)
+			x = p->posx + dx;
+			y = p->posy - dy;
+			while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
 			{
-				y_dist = dy / sin(M_PI - O);
-				break ;
+				if (grid[((y-1) / 100)][(x + 1) / 100] == 1)
+				{
+					x_dist = dy / sin(M_PI - O);
+					break ;
+				}
+				dx += 100;
+				dy = dx * tan(M_PI - O);
+				x = p->posx + dx;
+				y = p->posy - dy;
 			}
-			dy += 100;
+			dy = p->posy % 100;
 			dx = dy / tan(M_PI - O);
-			x = posx + dx;
-			y = posy - dy;
-		}
-	}
-	else if (p->O >= M_PI && p->O < 3 * M_PI / 2)
-	{
-		dx = 100 - (posx % 100);
-		dy = dx * tan(O - M_PI);
-		x = posx + dx;
-		y = posy + dy;
-		while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
-		{
-            printf("x = %i, y = %i\n", x, y);
-            printf("dx = %i, dy = %i\n", dx, dy);
-            printf("checking coordinates: %i, %i\n", ((y-1)/ 100), (x-1) / 100);
-			if (grid[(y / 100)][(x + 1) / 100] == 1)
+			x = p->posx + dx;
+			y = p->posy - dy;
+			while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
 			{
-				x_dist = dy / sin(O - M_PI);
-				break ;
+				if (grid[(y - 1) / 100][x / 100] == 1)
+				{
+					y_dist = dy / sin(M_PI - O);
+					break ;
+				}
+				dy += 100;
+				dx = dy / tan(M_PI - O);
+				x = p->posx + dx;
+				y = p->posy - dy;
 			}
-			dx += 100;
+			mindist = min(x_dist, y_dist);
+			wall = (x_dist > y_dist ? 4 : 1);
+		}
+		else if (p->O >= M_PI && p->O < 3 * M_PI / 2)
+		{
+			dx = 100 - (p->posx % 100);
 			dy = dx * tan(O - M_PI);
-			x = posx + dx;
-			y = posy + dy;
-		}
-		dy = 100 - (posy % 100);
-		dx = dy / tan(O - M_PI);
-		x = posx + dx;
-		y = posy + dy;
-		while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
-		{
-            printf("checking coordinates: %i, %i\n", ((y-1)/ 100), (x-1)/ 100 );
-			if (grid[(y + 1) / 100][x / 100] == 1)
+			x = p->osx + dx;
+			y = p->posy + dy;
+			while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
 			{
-				y_dist = dy / sin(O - M_PI);
-				break ;
+				if (grid[(y / 100)][(x + 1) / 100] == 1)
+				{
+					x_dist = dx / cos(O - M_PI);
+					break ;
+				}
+				dx += 100;
+				dy = dx * tan(O - M_PI);
+				x = p->posx + dx;
+				y = p->posy + dy;
 			}
-			dy += 100;
+			dy = 100 - (p->posy % 100);
 			dx = dy / tan(O - M_PI);
-			x = posx + dx;
-			y = posy + dy;
-		}
-	}
-	else if (p->O >= 3 * M_PI / 2 && p->O < 2 * M_PI)
-	{
-		dx = (posx % 100);
-		dy = dx * tan((2 * M_PI) - O);
-		x = posx - dx;
-		y = posy + dy;
-		while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
-		{
-            printf("x = %i, y = %i\n", x, y);
-            printf("dx = %i, dy = %i\n", dx, dy);
-            printf("checking coordinates: %i, %i\n", ((y-1)/ 100), (x-1) / 100);
-			if (grid[(y / 100)][(x - 1) / 100] == 1)
+			x = p->posx + dx;
+			y = p->posy + dy;
+			while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
 			{
-				x_dist = dy / sin((2 * M_PI) - O);
-				break ;
+				if (grid[(y + 1) / 100][x / 100] == 1)
+				{
+					y_dist = dy / sin(O - M_PI);
+					break ;
+				}
+				dy += 100;
+				dx = dy / tan(O - M_PI);
+				x = p->posx + dx;
+				y = p->posy + dy;
 			}
-			dx += 100;
+			mindist = min(x_dist, y_dist);
+			wall = (x_dist > y_dist ? 2 : 1);
+		}
+		else if (p->O >= 3 * M_PI / 2 && p->O < 2 * M_PI)
+		{
+			dx = (p->posx % 100);
 			dy = dx * tan((2 * M_PI) - O);
-			x = posx - dx;
-			y = posy + dy;
-		}
-		dy = 100 - (posy % 100);
-		dx = dy / tan((2 * M_PI) - O);
-		x = posx - dx;
-		y = posy + dy;
-		while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
-		{
-			printf("x = %i, y = %i\n", x, y);
-            printf("dx = %i, dy = %i\n", dx, dy);
-            printf("checking coordinates: %i, %i\n", (y/ 100), (x-1)/ 100 );
-			if (grid[(y) / 100][(x-1) / 100] == 1)
+			x = p->posx - dx;
+			y = p->posy + dy;
+			while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
 			{
-				y_dist = dy / sin((2 * M_PI) - O);
-				break ;
+				if (grid[(y / 100)][(x - 1) / 100] == 1)
+				{
+					x_dist = dy / sin((2 * M_PI) - O);
+					break ;
+				}
+				dx += 100;
+				dy = dx * tan((2 * M_PI) - O);
+				x = p->posx - dx;
+				y = p->posy + dy;
 			}
-			dy += 100;
+			dy = 100 - (p->posy % 100);
 			dx = dy / tan((2 * M_PI) - O);
-			x = posx - dx;
-			y = posy + dy;
+			x = p->posx - dx;
+			y = p->posy + dy;
+			while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
+			{
+				if (grid[(y) / 100][(x-1) / 100] == 1)
+				{
+					y_dist = dy / sin((2 * M_PI) - O);
+					break ;
+				}
+				dy += 100;
+				dx = dy / tan((2 * M_PI) - O);
+				x = p->posx - dx;
+				y = p->posy + dy;
+			}
+			mindist = min(x_dist, y_dist);
+			wall = (x_dist > y_dist ? 2 : 3);
 		}
+		dists_fov[i][0] = 50000 / mindist;
+		dists_fov[i][1] = wall;
+		O += 0.02;
+	}
+	
+	for (int j = 0; j < 60; j++)
+	{
+		printf("%i: [%i] [%i]\n", j, dists_fov[0], dists_fov[1]);
 	}
 }
 

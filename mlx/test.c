@@ -25,7 +25,7 @@ int main(void)
 	int y;
 	int dx;
 	int dy;
-	float O = 0;
+	float O = M_PI;
     int posx = 350;
     int posy = 350;
 	int grid_w = 800;
@@ -49,7 +49,8 @@ int main(void)
             printf("checking coordinates: %i, %i\n", ((y-1)/ 100), (x-1) / 100);
 			if (grid[((y-1) / 100)][(x - 1) / 100] == 1) //i-j coordinates of the block that the ray is intersecting (on the grid)
 			{
-				x_dist = dy / sin(O); //length of the ray
+				printf("dy = %i\nsin0 = %f\n", dy, sin(O));
+				x_dist = dx / cos(O); //length of the ray
 				break ;
 			}
 			dx += 100; //if grid value of block is 0 (empty space), keep going to the next vertical line until intersection with grid value 1 found
@@ -133,7 +134,7 @@ int main(void)
             printf("checking coordinates: %i, %i\n", ((y-1)/ 100), (x-1) / 100);
 			if (grid[(y / 100)][(x + 1) / 100] == 1) //i-j coordinates of the block that the ray is intersecting (on the grid)
 			{
-				x_dist = dy / sin(O - M_PI); //length of the ray
+				x_dist = dx / cos(O - M_PI); //length of the ray
 				break ;
 			}
 			dx += 100; //if grid value of block is 0 (empty space), keep going to the next vertical line until intersection with grid value 1 found
