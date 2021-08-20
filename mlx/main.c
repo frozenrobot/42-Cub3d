@@ -3,6 +3,12 @@
 #include <stdio.h>
 #include <math.h>
 
+#define CEIL 0x59bfff
+#define FLOOR 0x003300
+#define WWALL 0xff0000
+#define NWALL 0x00ff00
+#define EWALL 0x0000ff
+#define SWALL 0xffff00
 
 int grid[8][8] = {
 	{1, 1, 1, 1, 1, 1, 1, 1},
@@ -66,12 +72,19 @@ void	cast_rays(t_player *p, int grid_w, int grid_h)
 	int wall; //W=1, N=2, E=3, S=4;
 	int dists_fov[100][2];
 	int i;
+	int j;
 	float O;
 
 	i = -1;
 	O = p->O - 0.6;
+	if (O < 0)
+		O += (2 * M_PI);
 	while (++i < 100)
 	{
+		if (O < 0)
+			O += (2 * M_PI);
+		else if (O > (2 * M_PI))
+			O -= (2 * M_PI);
 		//this part sets the values for x_dist and y_dist (then, whichever is smaller is taken as ray dist; direction facing is set accordingly; then wall length is calculated)
 		x_dist = 200 * max(grid_w, grid_h);
 		y_dist = 200 * max(grid_w, grid_h);
@@ -231,15 +244,67 @@ void	cast_rays(t_player *p, int grid_w, int grid_h)
 		// printf("%f: [%i] [%i] [%i]\n", O, mindist, dists_fov[i][0], dists_fov[i][1]);
 	}
 	
-	for (int j = 0; j < 100; j++)
+	// for (int j = 0; j < 100; j++)
+	// {
+	// 	printf("%i: [%i] [%i]\n", j, dists_fov[j][0], dists_fov[j][1]);
+	// }
+
+	i = 0;
+	while (i < 500)
 	{
-		printf("%i: [%i] [%i]\n", j, dists_fov[j][0], dists_fov[j][1]);
+		// mlx_pixel_put(mlx_ptr, win_ptr, i, 5, 0xffffff);
+		j = 0;
+		while (j < (250 - (dists_fov[i / 5][0] / 2)))
+		{
+			mlx_pixel_put(mlx_ptr, win_ptr, i, j, CEIL);
+			j++;
+		}
+		while (j < (250 + (dists_fov[i / 5][0] / 2)) && j < 500)
+		{
+			if (dists_fov[i / 5][1] == 1)
+				wall = WWALL;
+			else if (dists_fov[i / 5][1] == 2)
+				wall = NWALL;
+			else if (dists_fov[i / 5][1] == 3)
+				wall = EWALL;
+			else if (dists_fov[i / 5][1] == 4)
+				wall = SWALL;
+			mlx_pixel_put(mlx_ptr, win_ptr, i, j, wall);
+			j++;
+		}
+		while (j < 500)
+		{
+			mlx_pixel_put(mlx_ptr, win_ptr, i, j, FLOOR);
+			j++;
+		}
+		i++;
 	}
+}
+
+float angle_change(int dir, float ang)
+{
+	// if (ang < 0.1 && dir == 0)
+	// 	return ((2 * M_PI) - 0.1 + ang);
+	// else if (ang >= (2 * M_PI) - 0.1 && dir == 1)
+	// 	return ((2 * M_PI) - ang);
+	// else if (dir == 0)
+	// 	return (ang - 0.1);
+	// else
+	// 	return (ang + 0.1);
+	if (dir == 0)
+		ang -= 0.1;
+	else if (dir == 1)
+		ang += 0.1;
+	if (ang < 0)
+		ang += (2 * M_PI);
+	else if (ang > 2 * M_PI)
+		ang -= (2 * M_PI);
+	return (ang);
 }
 
 int	deal_key(int key, t_player *player)
 {
-		if (key == 53)
+	if (key == 53)
 		exit(0);
 	// if (key) //A
 	// 	printf("%d\n", key);
@@ -252,8 +317,13 @@ int	deal_key(int key, t_player *player)
 		player->posx += 10;
 	if (key == 1) //S
 		player->posy += 10;
+	if (key == 123)
+		player->O = angle_change(0, player->O);
+	if (key == 124)
+		player->O = angle_change(1, player->O);
 	mlx_erase();
-	mlx_pixel_put(mlx_ptr, win_ptr, g_player->posx, g_player->posy, 0xffffff);
+	cast_rays(g_player, 8, 8);
+	// mlx_pixel_put(mlx_ptr, win_ptr, g_player->posx, g_player->posy, 0xffffff);
 	// printf("X: %f, Y: %f\n", player->posx, player->posy);
 	return (0);
 }
@@ -277,10 +347,10 @@ int main(void)
 	g_player->posx = 300;
 	g_player->posy = 300;
 	g_player->O = 3 * M_PI / 4;
-	cast_rays(g_player, 8, 8);
     mlx_ptr = mlx_init();
     win_ptr = mlx_new_window(mlx_ptr, 500, 500, "fdf");
-	mlx_pixel_put(mlx_ptr, win_ptr, g_player->posx, g_player->posy, 0xffffff);
+	cast_rays(g_player, 8, 8);
+	// mlx_pixel_put(mlx_ptr, win_ptr, g_player->posx, g_player->posy, 0xffffff);
 	mlx_key_hook(win_ptr, deal_key, g_player);
     mlx_loop(mlx_ptr);
 }
