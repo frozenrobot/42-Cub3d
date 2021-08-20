@@ -54,7 +54,7 @@ void mlx_erase(void)
 	}
 }
 
-void	cast_rays(int **grid, t_player *p, int grid_w, int grid_h)
+void	cast_rays(t_player *p, int grid_w, int grid_h)
 {
 	int x_dist;
 	int y_dist;
@@ -68,9 +68,9 @@ void	cast_rays(int **grid, t_player *p, int grid_w, int grid_h)
 	int i;
 	float O;
 
-	i = 0;
+	i = -1;
 	O = p->O - 0.6;
-	while (i++ < 60)
+	while (++i < 60)
 	{
 		//this part sets the values for x_dist and y_dist (then, whichever is smaller is taken as ray dist; direction facing is set accordingly; then wall length is calculated)
 		x_dist = 2 * max(grid_w, grid_h);
@@ -84,7 +84,7 @@ void	cast_rays(int **grid, t_player *p, int grid_w, int grid_h)
 			y = p->posy - dy;
 			while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
 			{
-				if (grid[((y - 1) / 100)][(x - 1) / 100] == 1) //i-j coordinates of the block that the ray is intersecting (on the grid) : \ 
+				if (grid[((y - 1) / 100)][(x - 1) / 100] == 1) //i-j coordinates of the block that the ray is intersecting (on the grid) :
 				{
 					x_dist = dx / cos(O); //length of the ray
 					break ;
@@ -153,7 +153,7 @@ void	cast_rays(int **grid, t_player *p, int grid_w, int grid_h)
 		{
 			dx = 100 - (p->posx % 100);
 			dy = dx * tan(O - M_PI);
-			x = p->osx + dx;
+			x = p->posx + dx;
 			y = p->posy + dy;
 			while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
 			{
@@ -226,11 +226,13 @@ void	cast_rays(int **grid, t_player *p, int grid_w, int grid_h)
 		dists_fov[i][0] = 50000 / mindist;
 		dists_fov[i][1] = wall;
 		O += 0.02;
+		// printf ("mindist = %i, len = %i, wall = %i\n", mindist, dists_fov[i][0], wall);
+		// break ;
 	}
 	
 	for (int j = 0; j < 60; j++)
 	{
-		printf("%i: [%i] [%i]\n", j, dists_fov[0], dists_fov[1]);
+		printf("%i: [%i] [%i]\n", j, dists_fov[j][0], dists_fov[j][1]);
 	}
 }
 
@@ -273,6 +275,8 @@ int main(void)
 	// player = &player_sub;
 	g_player->posx = 300;
 	g_player->posy = 300;
+	g_player->O = M_PI / 3;
+	cast_rays(g_player, 8, 8);
     mlx_ptr = mlx_init();
     win_ptr = mlx_new_window(mlx_ptr, 500, 500, "fdf");
 	mlx_pixel_put(mlx_ptr, win_ptr, g_player->posx, g_player->posy, 0xffffff);
