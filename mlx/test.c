@@ -25,7 +25,7 @@ int main(void)
 	int y;
 	int dx;
 	int dy;
-	float O = 7 * M_PI / 4;
+	float O = 0;
     int posx = 350;
     int posy = 350;
 	int grid_w = 800;

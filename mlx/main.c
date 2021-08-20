@@ -99,27 +99,25 @@ void	cast_rays(int **grid, t_player *p, int grid_w, int grid_h)
 	}
 	else if (p->O >= M_PI / 2 && p->O < M_PI)
 	{
-		//finding x_dist
-		dx = 100 - (posx % 100); //x goes to nearest line on left
-		dy = dx * tan(M_PI - O); //diff in y depends on angle
-		x = posx + dx; //x and y are the positions of the ray when intersecting a vertical line
+		dx = 100 - (posx % 100);
+		dy = dx * tan(M_PI - O);
+		x = posx + dx;
 		y = posy - dy;
-		while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100)) // **** CHANGE CONDITION, CAN GO OUT OF MAP INTO INFINITE LOOP CURRENT WAY **** // maybe convert stuff to float too
+		while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
 		{
             printf("x = %i, y = %i\n", x, y);
             printf("dx = %i, dy = %i\n", dx, dy);
             printf("checking coordinates: %i, %i\n", ((y-1)/ 100), (x+1) / 100);
-			if (grid[((y-1) / 100)][(x + 1) / 100] == 1) //i-j coordinates of the block that the ray is intersecting (on the grid)
+			if (grid[((y-1) / 100)][(x + 1) / 100] == 1)
 			{
-				x_dist = dy / sin(M_PI - O); //length of the ray
+				x_dist = dy / sin(M_PI - O);
 				break ;
 			}
-			dx += 100; //if grid value of block is 0 (empty space), keep going to the next vertical line until intersection with grid value 1 found
+			dx += 100;
 			dy = dx * tan(M_PI - O);
-			x = posx + dx; //x and y are the positions of the ray when intersecting a vertical line
+			x = posx + dx;
 			y = posy - dy;
 		}
-		//finding y_dist
 		dy = posy % 100;
 		dx = dy / tan(M_PI - O);
 		x = posx + dx;
@@ -140,27 +138,25 @@ void	cast_rays(int **grid, t_player *p, int grid_w, int grid_h)
 	}
 	else if (p->O >= M_PI && p->O < 3 * M_PI / 2)
 	{
-		//finding x_dist
-		dx = 100 - (posx % 100); //x goes to nearest line on left
-		dy = dx * tan(O - M_PI); //diff in y depends on angle
-		x = posx + dx; //x and y are the positions of the ray when intersecting a vertical line
+		dx = 100 - (posx % 100);
+		dy = dx * tan(O - M_PI);
+		x = posx + dx;
 		y = posy + dy;
-		while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100)) // **** CHANGE CONDITION, CAN GO OUT OF MAP INTO INFINITE LOOP CURRENT WAY **** // maybe convert stuff to float too
+		while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
 		{
             printf("x = %i, y = %i\n", x, y);
             printf("dx = %i, dy = %i\n", dx, dy);
             printf("checking coordinates: %i, %i\n", ((y-1)/ 100), (x-1) / 100);
-			if (grid[(y / 100)][(x + 1) / 100] == 1) //i-j coordinates of the block that the ray is intersecting (on the grid)
+			if (grid[(y / 100)][(x + 1) / 100] == 1)
 			{
-				x_dist = dy / sin(O - M_PI); //length of the ray
+				x_dist = dy / sin(O - M_PI);
 				break ;
 			}
-			dx += 100; //if grid value of block is 0 (empty space), keep going to the next vertical line until intersection with grid value 1 found
+			dx += 100;
 			dy = dx * tan(O - M_PI);
-			x = posx + dx; //x and y are the positions of the ray when intersecting a vertical line
+			x = posx + dx;
 			y = posy + dy;
 		}
-		//finding y_dist
 		dy = 100 - (posy % 100);
 		dx = dy / tan(O - M_PI);
 		x = posx + dx;
@@ -181,26 +177,25 @@ void	cast_rays(int **grid, t_player *p, int grid_w, int grid_h)
 	}
 	else if (p->O >= 3 * M_PI / 2 && p->O < 2 * M_PI)
 	{
-		dx = (posx % 100); //x goes to nearest line on left
-		dy = dx * tan((2 * M_PI) - O); //diff in y depends on angle
-		x = posx - dx; //x and y are the positions of the ray when intersecting a vertical line
+		dx = (posx % 100);
+		dy = dx * tan((2 * M_PI) - O);
+		x = posx - dx;
 		y = posy + dy;
-		while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100)) // **** CHANGE CONDITION, CAN GO OUT OF MAP INTO INFINITE LOOP CURRENT WAY **** // maybe convert stuff to float too
+		while (x > 0 && x < (grid_w * 100) && y > 0 && y < (grid_h * 100))
 		{
             printf("x = %i, y = %i\n", x, y);
             printf("dx = %i, dy = %i\n", dx, dy);
             printf("checking coordinates: %i, %i\n", ((y-1)/ 100), (x-1) / 100);
-			if (grid[(y / 100)][(x - 1) / 100] == 1) //i-j coordinates of the block that the ray is intersecting (on the grid)
+			if (grid[(y / 100)][(x - 1) / 100] == 1)
 			{
-				x_dist = dy / sin((2 * M_PI) - O); //length of the ray
+				x_dist = dy / sin((2 * M_PI) - O);
 				break ;
 			}
-			dx += 100; //if grid value of block is 0 (empty space), keep going to the next vertical line until intersection with grid value 1 found
+			dx += 100;
 			dy = dx * tan((2 * M_PI) - O);
-			x = posx - dx; //x and y are the positions of the ray when intersecting a vertical line
+			x = posx - dx;
 			y = posy + dy;
 		}
-		//finding y_dist
 		dy = 100 - (posy % 100);
 		dx = dy / tan((2 * M_PI) - O);
 		x = posx - dx;
