@@ -220,3 +220,17 @@ int main(void)
 	// 	printf("%i: O = %f, pixlen = %i, wall = %i\n", j, )
 	// }
 }
+
+
+
+float spawn_angle(char dir)
+{
+	if (dir == W)
+		return (0);
+	else if (dir == N)
+		return (M_PI / 2);
+	else if (dir == E)
+		return (M_PI);
+	else if (dir == S)
+		return (3 * M_PI);
+}
